@@ -92,7 +92,6 @@ var player = new Player();
 var keyboard = new Keyboard();
 var bullets = []
 var enemies = []
-enemies.push(new Enemy());
 
 // load an image to draw
 var chuckNorris = document.createElement("img");

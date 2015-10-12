@@ -3,7 +3,7 @@ var RIGHT = 1;
 
 var ANIM_MAX = 9;
 
-var Enemy = function() 
+var Enemy = function(x, y) 
 {
 	this.image = document.createElement("img");
 	this.image.src = "spaghetti2.png";
@@ -13,10 +13,11 @@ var Enemy = function()
 	this.height = 100;
 	
 	this.position = new Vector2();
-	this.position.set(canvas.width/2, canvas.height/2);
+	this.position.set(x, y);
 	
 	
-	this.velocity = RIGHT
+	this.velocity = new Vector2();
+	
 	
 	this.direction = LEFT;
 	
