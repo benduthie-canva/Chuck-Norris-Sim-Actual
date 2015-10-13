@@ -1,6 +1,3 @@
-var LEFT = -1;
-var RIGHT = 1;
-
 var ANIM_MAX = 9;
 
 var Enemy = function(x, y) 
@@ -30,8 +27,6 @@ var Enemy = function(x, y)
 	
 Enemy.prototype.update = function(deltaTime)
 {
-	this.moveRight = true;
-	
 	if(this.pause > 0)
 	{
 		this.pause -= deltaTime;
@@ -86,5 +81,5 @@ Enemy.prototype.update = function(deltaTime)
 
 Enemy.prototype.draw = function()
 {
-	context.drawImage(this.image, this.position.x - worldOffsetX, this.position.y);
+	context.drawImage(this.image, this.position.x - worldOffsetX - this.width/2, this.position.y - this.height/2);
 }

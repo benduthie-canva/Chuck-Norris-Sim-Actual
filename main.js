@@ -64,6 +64,9 @@ var JUMP = METER * 1500;
 var STATE_SPLASH = 0;
 var STATE_GAME = 1;
 var STATE_GAMEOVER = 2;
+var STATE_DEATH = 3;
+var STATE_SCORES = 4;
+
 var gameState = STATE_SPLASH;
 
 var LAYER_OBJECT_ENEMIES = 3;
@@ -87,6 +90,8 @@ var ENEMY_ACCEL = ENEMY_MAXDX * 2;
 var fps = 0;
 var fpsCount = 0;
 var fpsTime = 0;
+
+var deathTimer = 0;
 
 var player = new Player();
 var keyboard = new Keyboard();
@@ -166,7 +171,7 @@ function initialize()
 			urls: ["background.ogg"],
 			loop: true,
 			buffer: true,
-			volume: 0.5
+			volume: 0.01
 		} 
 	);
 	
@@ -188,8 +193,11 @@ function initialize()
 
 function intersects(o1, o2)
 {
-	if(o2.position.y + o2.height < o1.position.y || o2.position.x + o2.width < o1.position.x ||	o2.position.x > o1.position.x + o1.width || o2.position.y > o1.position.y + o1.height)
+	if(o2.position.y + o2.height/2 < o1.position.y - o1.height/2 || o2.position.x + o2.width/2 < o1.position.x - o1.width/2 ||	o2.position.x - o2.width/2 > o1.position.x + o1.width/2 || o2.position.y - o2.height/2 > o1.position.y + o1.height/2)
 	{
+		//draws collision boxes for testing
+		//context.fillRect(o2.position.x - o2.width/2 - worldOffsetX, o2.position.y - o2.height/2, o2.width, o2.height)
+		//context.fillRect(o1.position.x - o1.width/2 - worldOffsetX, o1.position.y - o1.height/2, o1.width, o1.height)
 		return false;
 	}
 	return true;
@@ -304,9 +312,35 @@ function runGameOver(deltaTime)
 	context.font="20px Georgia";
 	context.fillStyle= '#000000';
 	context.fillText("You died, refresh the page or press f5 to play again.   ", 10, 50);
-
-	
 }
+
+function runDeath(deltaTime)
+{
+	context.font="20px Georgia";
+	context.fillStyle= '#000000';
+	context.fillText("You died", 10, 20);
+	context.fillText(Math.floor(deathTimer) + 1, 10, 50);
+	if (player.lives == 0)
+	{
+		context.fillText("Game over man, GAME OVER", 10, 20);
+
+	}
+	else if (deathTimer > 0)
+	{
+		deathTimer -= deltaTime;
+		player.position.x = canvas.width/2;
+		player.position.y = 200;
+	}
+	else
+	{
+		player.position.x = canvas.width/2;
+		player.position.y = 200;
+		player.lives -= 1;
+		gameState = STATE_GAME;
+	}
+}
+
+
 
 function run()
 {
@@ -324,6 +358,10 @@ function run()
 		case STATE_GAMEOVER:
 		runGameOver(deltaTime);
 		break;	
+		
+		case STATE_DEATH:
+		runDeath(deltaTime);
+		break;
 			
 		case STATE_GAME:
 
@@ -335,8 +373,7 @@ function run()
 		
 		context.fillStyle = "yellow";
 		context.font="32px Arial";
-		var scoreText = "Score: " + player.score;
-		context.fillText(scoreText, SCREEN_WIDTH - 170, 35);
+		//context.fillText("Score: " + player.score, SCREEN_WIDTH - 170, 35);
 		
 		
 		
@@ -351,33 +388,48 @@ function run()
 		
 		for(var i=0; i<player.lives; i++)
 		{
-			context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 450);
+			//context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 450);
 		}
 		
 		for (var i = 0; i<bullets.length; i++)
 		{
-			bullets[i].update(deltaTime);
 			bullets[i].draw();
 
 		}
 		for (var i = 0; i<enemies.length; i++)
 		{
-			enemies[i].update(deltaTime);
-			enemies[i].draw();
 
 		}
 		
-		for (var i = 0; i<bullets.length; i++)
+		for (var a = 0; a<enemies.length; a++)
 		{
-			for (var a = 0; a<enemies.length; a++)
+			enemies[a].update(deltaTime);
+
+			for (var i = 0; i<bullets.length; i++)
 			{
+				bullets[i].update(deltaTime);
+
 				if (intersects(bullets[i], enemies[a]) == true)
 				{
-					enemies.splice(i, 1)
-					bullets.splice(a, 1)
+					enemies.splice(a, 1);
+					bullets.splice(i, 1);
+					player.score += 1
 					break;
 				}
+				bullets[i].draw				
+			}			
+		}
+		
+		for (var a = 0; a<enemies.length; a++)
+		{			
+			if (intersects(player, enemies[a]) == true)
+			{
+				gameState = STATE_DEATH;
+				deathTimer = 2.5;
+
+				break;
 			}
+			enemies[a].draw();
 		}
 		
 		player.draw();

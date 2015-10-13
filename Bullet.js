@@ -1,9 +1,9 @@
-var Bullet = function() 
+var Bullet = function(x, y) 
 {
 	this.image = document.createElement("img");
 	
 	this.position = new Vector2();
-	this.position.set(player.position.x, player.position.y);
+	this.position.set(x, y);
 	
 	this.width = 40;
 	this.height = 20;
@@ -25,11 +25,11 @@ var Bullet = function()
 
 Bullet.prototype.update = function(deltaTime)
 {
-	this.position.x += this.velocity * deltaTime * 60;
+	this.position.x += this.velocity * deltaTime * 10;
 }
 Bullet.prototype.draw = function()
 {
 	context.save();
-	context.drawImage(this.image, this.position.x  - worldOffsetX, this.position.y );
+	context.drawImage(this.image, this.position.x  - worldOffsetX - this.width/2, this.position.y - this.height/2);
 	context.restore();
 }
