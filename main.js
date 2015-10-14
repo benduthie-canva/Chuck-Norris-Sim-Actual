@@ -195,7 +195,7 @@ function initialize()
 			urls: ["background.ogg"],
 			loop: true,
 			buffer: true,
-			volume: 0.01
+			volume: 0.5
 		} 
 	);
 	
