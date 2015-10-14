@@ -284,6 +284,11 @@ Player.prototype.update = function(deltaTime)
 				this.velocity.x = 0; // stop horizontal velocity
 			}
 		}
+		
+		if(cellAtTileCoord(LAYER_OBJECT_TRIGGERS, tx, ty) == true)
+		{
+			gameState = STATE_WIN;
+		}
 	}
 }
 

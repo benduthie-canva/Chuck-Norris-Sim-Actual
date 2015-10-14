@@ -66,6 +66,7 @@ var STATE_GAME = 1;
 var STATE_GAMEOVER = 2;
 var STATE_DEATH = 3;
 var STATE_SCORES = 4;
+var STATE_WIN = 5;
 
 var gameState = STATE_SPLASH;
 
@@ -164,6 +165,29 @@ function initialize()
 			idx++;
 		}
 	} 
+	
+	cells[LAYER_OBJECT_TRIGGERS] = [];
+	idx = 0;
+	for(var y = 0; y < level1.layers[LAYER_OBJECT_TRIGGERS].height; y++) 
+	{
+		cells[LAYER_OBJECT_TRIGGERS][y] = [];
+		for(var x = 0; x < level1.layers[LAYER_OBJECT_TRIGGERS].width; x++) 
+		{
+			if(level1.layers[LAYER_OBJECT_TRIGGERS].data[idx] != 0) 
+			{
+				cells[LAYER_OBJECT_TRIGGERS][y][x] = 1;
+				cells[LAYER_OBJECT_TRIGGERS][y-1][x] = 1;
+				cells[LAYER_OBJECT_TRIGGERS][y-1][x+1] = 1;
+				cells[LAYER_OBJECT_TRIGGERS][y][x+1] = 1;
+			}
+			else if(cells[LAYER_OBJECT_TRIGGERS][y][x] != 1) 
+			{
+				// if we haven't set this cell's value, then set it to 0 now
+				cells[LAYER_OBJECT_TRIGGERS][y][x] = 0;
+			}
+			idx++;
+		}
+	}
 	
 	musicBackground = new Howl
 	(
@@ -305,13 +329,30 @@ function runSplash(deltaTime)
 
 }
 
+function runWin (deltaTime)
+{
+	context.font="20px Georgia";
+	context.fillStyle= '#000000';
+	context.fillText ("You've Won!", 10, 20);
+}
+
 function runGameOver(deltaTime)
 {
 	//game over image
 
 	context.font="20px Georgia";
 	context.fillStyle= '#000000';
-	context.fillText("You died, refresh the page or press f5 to play again.   ", 10, 50);
+	context.fillText("Game over man, GAME OVER", 10, 20);
+	deathTimer -= deltaTime;
+	if (deathTimer <= 0)
+	{
+		player = new Player();
+		
+		gameState = STATE_SPLASH
+		bullets.splice(0, bullets.length)
+		enemies.splice(0, enemies.length)
+		initialize();
+	}
 }
 
 function runDeath(deltaTime)
@@ -322,14 +363,17 @@ function runDeath(deltaTime)
 	context.fillText(Math.floor(deathTimer) + 1, 10, 50);
 	if (player.lives == 0)
 	{
-		context.fillText("Game over man, GAME OVER", 10, 20);
-
+		gameState = STATE_GAMEOVER
 	}
 	else if (deathTimer > 0)
 	{
 		deathTimer -= deltaTime;
 		player.position.x = canvas.width/2;
 		player.position.y = 200;
+		context.font="20px Georgia";
+		context.fillStyle= '#000000';
+		context.fillText("You died", 10, 20);
+		context.fillText(Math.floor(deathTimer) + 1, 10, 50);
 	}
 	else
 	{
@@ -362,6 +406,10 @@ function run()
 		case STATE_DEATH:
 		runDeath(deltaTime);
 		break;
+		
+		case STATE_WIN:
+		runWin(deltaTime);
+		break;
 			
 		case STATE_GAME:
 
@@ -373,7 +421,7 @@ function run()
 		
 		context.fillStyle = "yellow";
 		context.font="32px Arial";
-		//context.fillText("Score: " + player.score, SCREEN_WIDTH - 170, 35);
+		context.fillText("Score: " + player.score, SCREEN_WIDTH - 170, 35);
 		
 		
 		
@@ -388,7 +436,7 @@ function run()
 		
 		for(var i=0; i<player.lives; i++)
 		{
-			//context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 450);
+			context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 450);
 		}
 		
 		for (var i = 0; i<bullets.length; i++)
@@ -426,6 +474,9 @@ function run()
 			{
 				gameState = STATE_DEATH;
 				deathTimer = 2.5;
+				enemies.splice(0, enemies.length);
+				initialize();
+				
 
 				break;
 			}
@@ -451,7 +502,8 @@ function run()
 		
 		if (player.position.y > SCREEN_HEIGHT)
 		{
-			gameState = STATE_GAMEOVER;
+			gameState = STATE_DEATH;
+			deathTimer = 2.5;
 		}
 		
 		

@@ -3,7 +3,7 @@ var ANIM_MAX = 9;
 var Enemy = function(x, y) 
 {
 	this.image = document.createElement("img");
-	this.image.src = "spaghetti2.png";
+	this.image.src = "spaghettiright.png";
 
 
 	this.width = 100;
@@ -47,6 +47,8 @@ Enemy.prototype.update = function(deltaTime)
 			if(celldiag && !cellright) 
 			{
 				ddx = ddx + ENEMY_ACCEL; // enemy wants to go right
+				this.image.src = "spaghettiright.png";
+
 			}
 			else 
 			{
@@ -60,6 +62,8 @@ Enemy.prototype.update = function(deltaTime)
 			if(celldown && !cell) 
 			{
 				ddx = ddx - ENEMY_ACCEL; // enemy wants to go left
+				this.image.src = "spaghettileft.png";
+
 			}
 			else 
 			{
